@@ -12,3 +12,29 @@ class User {
     return map;
   }
 }
+
+class QuestionModel {
+  int id;
+  String qtype;
+  String question;  
+  
+  
+  QuestionModel(this.id, this.qtype ,this.question);  
+  
+  QuestionModel.fromjson(Map<String , dynamic> map) 
+  : id = int.parse(map['id']),
+    qtype = map['qtype'],
+    question = map['question'];
+
+
+    Map<String , dynamic> tomapdb(){
+      var map = Map<String , dynamic>();
+      map['id'] = id;
+      map['qtype'] = qtype;
+      map['question'] = question;
+      return map;
+    }
+}
+
+
+
