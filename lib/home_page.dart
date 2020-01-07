@@ -2,20 +2,25 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
-import 'package:after_layout/after_layout.dart';
+// import 'package:after_layout/after_layout.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login/asses.dart';
+import 'package:login/agenda.dart';
 // import 'package:flutter/services.dart';
 import 'package:login/authentication.dart';
-import 'package:login/login_page.dart';
+// import 'package:login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:login/login_page.dart';
 // import 'package:firebase_database/firebase_database.dart';
 // import 'package:login/models/todo.dart';
 // import 'dart:async';
 import 'Talk_to_people.dart';
+import 'agenda.dart';
 import 'authentication.dart';
-// import 'login_page.dart';
+import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.auth, this.userId, this.logoutCallback})
@@ -30,19 +35,38 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
- String mood = "Happy";
-
+ String mood = "Take assesment";
+String status = "Not yet Known";
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
      checkUserType(); 
-     Timer.periodic(Duration(seconds:1), (timer){
+     Timer.periodic(Duration(seconds:20), (timer){
        checkMood();
+       checkstatus();
      });
   }
-  
 
+// GoogleSignIn _googleSignIn = GoogleSignIn();
+  
+signout() async{
+  try {
+
+await widget.auth.signOut();
+// await singout();
+// await _googleSignIn.signOut();
+
+widget.logoutCallback();
+
+  }
+  catch (e) {
+    print(e);
+  }
+}
+// static Future<void> signout() async {
+//   await widget.auth.signOut().then((_){}
+// }
   // final FirebaseDatabase _database = FirebaseDatabase.instance;
   // final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -61,10 +85,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final drawerHeader = UserAccountsDrawerHeader(
       accountName: Text("email"),
-      accountEmail: Text("name"),
+      accountEmail: Text( email),
       currentAccountPicture: CircleAvatar(
-        backgroundImage: NetworkImage("imageUrl"),
-        backgroundColor:  Colors.white,),
+        // backgroundImage: NetworkImage("imageUrl"),
+          backgroundImage: NetworkImage("https://ibb.co/QdK6fkd")),
         
     );
 
@@ -88,19 +112,22 @@ class _HomePageState extends State<HomePage> {
         ),
          ListTile(
           title:  Text('Agenda Today'),
-          onTap: () => {},
+          onTap: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => AgendaPage()));
+          },
           
         ),
         ListTile(
           title: Text('Logout'),
         onTap: (){
+          // _signout();
           
          
-          // signOut();
+        signout();
         logout();
            
         // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginSignupPage();}), ModalRoute.withName('/'));
+          // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginSignupPage();}), ModalRoute.withName('/'));
           // Navigator.of(context).pushAndRemoveUntil('/',(Route<dynamic> route) => false);
           
       },
@@ -112,12 +139,17 @@ class _HomePageState extends State<HomePage> {
   
  final sample = Padding(
       padding: EdgeInsets.all(8.0),
-      child: Text('Name',
+      child: Text(email,
       style: TextStyle(fontSize: 16.0, color: Colors.white),),
     );
   final sample2 = Padding(
       padding: EdgeInsets.all(8.0),
       child: Text(mood,
+      style: TextStyle(fontSize: 28.0, color: Colors.white),),
+    );
+     final sample3 = Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Text(status,
       style: TextStyle(fontSize: 28.0, color: Colors.white),),
     );
 
@@ -132,7 +164,7 @@ class _HomePageState extends State<HomePage> {
         ]),
       ),
       child: Column(
-        children: <Widget>[sample,sample2],
+        children: <Widget>[sample,sample2,sample3],
       ),
       );
 
@@ -221,10 +253,12 @@ class _HomePageState extends State<HomePage> {
       askIfIntroExtro();
     }
   }
+ 
 
   void logout() async{
     final SharedPreferences pref = await SharedPreferences.getInstance();
      pref.setString("usertype",null);
+
   }
    void checkMood() async {
      final SharedPreferences pref = await SharedPreferences.getInstance();
@@ -240,6 +274,24 @@ class _HomePageState extends State<HomePage> {
      } else {
        setState(() {
          mood = "SAD";
+       });
+     }
+   }
+
+   void checkstatus() async {
+     final SharedPreferences pref = await SharedPreferences.getInstance();
+      final int todaystatus = pref.getInt("score2");
+     if (todaystatus == 3) {
+       setState(() {
+         status = "Hataw pa";
+       });
+     } else if (todaystatus > 3) {
+       setState(() {
+         status = "Active";
+       });
+     } else {
+       setState(() {
+         status = "Down";
        });
      }
    }
